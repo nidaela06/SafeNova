@@ -1,10 +1,13 @@
 <?php
-$host       = "localhost";
+// Railway Canlı Veritabanı Bilgileri
+$host       = "tramway.proxy.rlwy.net";
 $kullanici  = "root";
-$sifre      = "";
-$veritabani = "safenova_db";
+$sifre      = "rtFqFcMRVszREQvMUPPqDcdonJDGwsRU";
+$veritabani = "railway"; // HeidiSQL'de sol tarafta gördüğün isim
+$port       = 51401;     // Railway'in sana verdiği özel port
 
-$conn = new mysqli($host, $kullanici, $sifre, $veritabani);
+// Bağlantıyı kurarken port numarasını da ekliyoruz
+$conn = new mysqli($host, $kullanici, $sifre, $veritabani, $port);
 $conn->set_charset("utf8mb4");
 
 if ($conn->connect_error) {
