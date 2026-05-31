@@ -1,8 +1,13 @@
 <?php
 session_start();
-session_destroy(); // Tüm oturum bilgilerini siler
-header("Location: login.php"); // Seni login sayfasına atar
-exit();
+// Eğer giriş bilgisi (anahtar) yoksa, kullanıcıyı login'e kov
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+// Giriş yapanın adını panelde kullanmak için değişkene alalım
+$user_name = isset($_SESSION['ad_soyad']) ? $_SESSION['ad_soyad'] : "Kullanıcı";
 ?>
 
 <!DOCTYPE html>
