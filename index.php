@@ -1,13 +1,10 @@
 <?php
 session_start();
-// Eğer giriş yapılmadıysa login'e gönder
+// Eğer giriş bilgisi yoksa login'e gönder
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
-
-// Giriş yapanın adını değişkene al (Panelde kullanmak için)
-$user_name = isset($_SESSION['ad_soyad']) ? $_SESSION['ad_soyad'] : "Kullanıcı";
 ?>
 <!DOCTYPE html>
 <html lang="tr">
