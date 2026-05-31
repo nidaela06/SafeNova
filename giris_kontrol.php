@@ -1,5 +1,12 @@
 <?php
+ob_start();
+ini_set("session.save_path", "/tmp");
 session_start();
+
+if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] !== 'https') {
+    header('Location: https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], true, 301);
+    exit();
+}
 include("baglanti.php");
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
