@@ -35,8 +35,9 @@ if (!empty($email)) {
 
 // Şifre değiştirilecek mi?
 if (!empty($sifre)) {
+    $sifre_hash = password_hash($sifre, PASSWORD_BCRYPT);
     $stmt = $conn->prepare("UPDATE users SET ad_soyad=?, email=?, phone=?, sifre=? WHERE id=?");
-    $stmt->bind_param("ssssi", $ad_soyad, $email, $phone, $sifre, $user_id);
+    $stmt->bind_param("ssssi", $ad_soyad, $email, $phone, $sifre_hash, $user_id);
 } else {
     $stmt = $conn->prepare("UPDATE users SET ad_soyad=?, email=?, phone=? WHERE id=?");
     $stmt->bind_param("sssi", $ad_soyad, $email, $phone, $user_id);
@@ -51,3 +52,4 @@ if ($stmt->execute()) {
 
 $stmt->close();
 $conn->close();
+?>
