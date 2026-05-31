@@ -1,69 +1,50 @@
 <?php
 session_start();
-header('Content-Type: application/json; charset=utf-8');
+include("baglanti.php");
 
-if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['status' => 'error', 'message' => 'Oturum açık değil']);
-    exit;
-}
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $email = trim($_POST["email"] ?? '');
+    $sifre = $_POST["sifre"] ?? '';
 
-include 'baglanti.php';
-
-$user_id         = (int) $_SESSION['user_id'];
-$ad_soyad        = trim($_POST['ad_soyad']        ?? '');
-$email           = trim($_POST['email']            ?? '');
-$phone           = trim($_POST['phone']            ?? '');
-$sifre           = $_POST['sifre']                 ?? '';
-$dogum_tarihi    = trim($_POST['dogum_tarihi']     ?? '');
-$kan_grubu       = trim($_POST['kan_grubu']        ?? '');
-$kronik_hastalik = trim($_POST['kronik_hastalik']  ?? '');
-$ilac_kullanimi  = trim($_POST['ilac_kullanimi']   ?? '');
-$alerji          = trim($_POST['alerji']           ?? '');
-
-if (empty($ad_soyad)) {
-    echo json_encode(['status' => 'error', 'message' => 'Ad Soyad bos olamaz']);
-    exit;
-}
-
-if (!empty($email)) {
-    $chk = $conn->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
-    $chk->bind_param("si", $email, $user_id);
-    $chk->execute();
-    $chk->store_result();
-    if ($chk->num_rows > 0) {
-        echo json_encode(['status' => 'error', 'message' => 'Bu e-posta baska bir hesapta kullaniliyor']);
-        exit;
+    if (empty($email) || empty($sifre)) {
+        echo "E-posta veya şifre boş bırakılamaz!";
+        exit();
     }
-    $chk->close();
+
+    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $user = $result->fetch_assoc();
+
+        // Hem hash'li hem düz metin şifreye destek (geçiş dönemi)
+        $giris_ok = false;
+        if (password_verify($sifre, $user['sifre'])) {
+            $giris_ok = true;
+        } elseif ($user['sifre'] === $sifre) {
+            // Eski düz metin şifre → hash'e yükselt
+            $yeni_hash = password_hash($sifre, PASSWORD_BCRYPT);
+            $upd = $conn->prepare("UPDATE users SET sifre = ? WHERE id = ?");
+            $upd->bind_param("si", $yeni_hash, $user['id']);
+            $upd->execute();
+            $upd->close();
+            $giris_ok = true;
+        }
+
+        if ($giris_ok) {
+            $_SESSION['user_id']  = $user['id'];
+            $_SESSION['ad_soyad'] = $user['ad_soyad'];
+            $stmt->close();
+            $conn->close();
+            header("Location: index.php");
+            exit();
+        }
+    }
+
+    $stmt->close();
+    $conn->close();
+    echo "E-posta veya şifre yanlış!";
 }
-
-$dogum_tarihi_val = !empty($dogum_tarihi) ? $dogum_tarihi : null;
-
-if (!empty($sifre)) {
-    $stmt = $conn->prepare("UPDATE users SET ad_soyad=?, email=?, phone=?, sifre=?,
-        dogum_tarihi=?, kan_grubu=?, kronik_hastalik=?, ilac_kullanimi=?, alerji=?
-        WHERE id=?");
-    $stmt->bind_param("sssssssssi",
-        $ad_soyad, $email, $phone, $sifre,
-        $dogum_tarihi_val, $kan_grubu, $kronik_hastalik, $ilac_kullanimi, $alerji,
-        $user_id);
-} else {
-    $stmt = $conn->prepare("UPDATE users SET ad_soyad=?, email=?, phone=?,
-        dogum_tarihi=?, kan_grubu=?, kronik_hastalik=?, ilac_kullanimi=?, alerji=?
-        WHERE id=?");
-    $stmt->bind_param("ssssssssi",
-        $ad_soyad, $email, $phone,
-        $dogum_tarihi_val, $kan_grubu, $kronik_hastalik, $ilac_kullanimi, $alerji,
-        $user_id);
-}
-
-if ($stmt->execute()) {
-    $_SESSION['ad_soyad'] = $ad_soyad;
-    echo json_encode(['status' => 'ok', 'message' => 'Bilgiler guncellendi']);
-} else {
-    echo json_encode(['status' => 'error', 'message' => 'Guncelleme basarisiz: ' . $stmt->error]);
-}
-
-$stmt->close();
-$conn->close();
 ?>
