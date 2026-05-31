@@ -1,4 +1,5 @@
 <?php
+error_reporting(E_ALL); ini_set('display_errors', 1);
 ob_start();
 ini_set("session.save_path", "/tmp");
 session_start();
@@ -11,7 +12,7 @@ if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROT
 require("baglanti.php");
 
 if (isset($_SESSION['user_id'])) {
-    header("Location: index.php");
+    header("Location:index.php");
     exit();
 }
 
@@ -20,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sifre = $_POST["sifre"] ?? '';
 
     if (empty($email) || empty($sifre)) {
-        header("Location: login.php?hata=bos");
+        header("Location:login.php?hata=bos");
         exit();
     }
 
@@ -56,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $stmt->close();
     $conn->close();
-    header("Location: login.php?hata=yanlis");
+    header("Location:login.php?hata=yanlis");
     exit();
 }
 
