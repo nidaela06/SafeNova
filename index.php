@@ -1,9 +1,9 @@
 <?php
 session_start();
-echo "Gelen ID: " . ($_SESSION['user_id'] ?? 'ID YOK');
-echo "<br>Gelen İsim: " . ($_SESSION['ad_soyad'] ?? 'İSİM YOK');
-// header("Location: login.php"); // Şimdilik bunu yorum satırı yap ki hatayı görelim
-exit();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
