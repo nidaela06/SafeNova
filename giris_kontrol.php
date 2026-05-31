@@ -1,5 +1,4 @@
 <?php
-ini_set("session.save_path", "/tmp");
 session_start();
 require("baglanti.php");
 
@@ -7,18 +6,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST["email"] ?? '');
     $sifre = $_POST["sifre"] ?? '';
 
-    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $user = $result->fetch_assoc();
-
-    if (!$user) {
-        die("KULLANICI BULUNAMADI - email: " . $email);
+    if (empty($email) || empty($sifre)) {
+        header("Location: login.php?hata=bos");
+        exit();
     }
 
-    $verify = password_verify($sifre, $user['sifre']);
-    die("Kullanıcı bulundu. is_admin: " . $user['is_admin'] . " | verify: " . ($verify ? 'DOĞRU' : 'YANLIŞ') . " | db_sifre_bas: " . substr($user['sifre'], 0, 10));
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? AND is_admin = 0");
+    $stmt->execute([$email]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($user && password_verify($sifre, $user['sifre'])) {
+        $_SESSION['user_id']  = $user['id'];
+        $_SESSION['ad_soyad'] = $user['ad_soyad'];
+        header("Location: index.php");
+        exit();
+    }
+
+    header("Location: login.php?hata=yanlis");
+    exit();
 }
+
 header("Location: login.php");
 exit();
