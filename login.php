@@ -1,3 +1,4 @@
+<?php session_start(); if(isset($_SESSION['user_id'])){ header("Location: index.php"); exit(); } ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -70,7 +71,16 @@ text-decoration:none;
 <input type="email" name="email" placeholder="E-posta">
 <input type="password" name="sifre" placeholder="Şifre">
 
-<button  type="submit">Giriş Yap</button>
+<?php
+$hata_mesaj = '';
+if(isset($_GET['hata'])){
+    if($_GET['hata']==='yanlis') $hata_mesaj = 'E-posta veya şifre yanlış!';
+    elseif($_GET['hata']==='bos') $hata_mesaj = 'E-posta ve şifre boş bırakılamaz!';
+}
+if($hata_mesaj): ?>
+<p style="color:#ff2e7a;font-size:13px;margin:6px 0;"><?= htmlspecialchars($hata_mesaj) ?></p>
+<?php endif; ?>
+<button type="submit">Giriş Yap</button>
 
 
 <p>Hesabın yok mu?</p>
