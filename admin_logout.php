@@ -3,8 +3,9 @@
  * SafeNova Admin - Çıkış
  */
 
-include '../config/baglanti.php';
-include '../config/security.php';
+session_start();
+include 'baglanti.php';
+include 'config_security.php';
 
 if (isset($_SESSION['admin_id'])) {
     logAdminAction($_SESSION['admin_id'], 'LOGOUT', 'Admin çıkış yapıldı');
@@ -13,6 +14,6 @@ if (isset($_SESSION['admin_id'])) {
 session_destroy();
 setcookie('admin_email', '', time() - 3600, '/');
 
-header('Location: index.php');
+header('Location: login.php');
 exit();
 ?>
