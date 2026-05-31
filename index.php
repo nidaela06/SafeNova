@@ -1,11 +1,16 @@
 <?php
 session_start();
+// GÜVENLİK KAPISI:
+// Eğer 'user_id' diye bir oturum bilgisi YOKSA, kullanıcı giriş yapmamış demektir.
 if (!isset($_SESSION['user_id'])) {
+    // Kullanıcıyı hemen login sayfasına kovuyoruz:
     header("Location: login.php");
     exit();
 }
-?>
 
+// Eğer kod buraya kadar geldiyse, kullanıcı giriş yapmış demektir.
+// Aşağıdaki HTML kodları artık güvenle yüklenebilir.
+?>
 <!DOCTYPE html>
 <html lang="tr">
 <head>
