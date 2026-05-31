@@ -1,5 +1,10 @@
 <?php
 session_start();
+// Kullanıcı giriş yapmamışsa (oturum yoksa) giriş sayfasına yönlendir
+if (!isset($_SESSION['user_id']) && !isset($_SESSION['ad_soyad'])) {
+    header("Location: login.php");
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="tr">
