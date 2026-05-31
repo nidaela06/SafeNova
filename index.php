@@ -1,10 +1,13 @@
 <?php
 session_start();
-// Kullanıcı giriş yapmamışsa (oturum yoksa) giriş sayfasına yönlendir
-if (!isset($_SESSION['user_id']) && !isset($_SESSION['ad_soyad'])) {
+// Eğer oturumda user_id yoksa, kullanıcı giriş yapmamış demektir.
+if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
+
+// Giriş yapan kişinin ismini değişkenlere atayalım (panelde kullanmak için)
+$user_name = $_SESSION['ad_soyad'];
 ?>
 <!DOCTYPE html>
 <html lang="tr">
