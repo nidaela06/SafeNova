@@ -7,7 +7,13 @@ if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROT
     header('Location: https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], true, 301);
     exit();
 }
-include("baglanti.php");
+
+require("baglanti.php");
+
+if (isset($_SESSION['user_id'])) {
+    header("Location: index.php");
+    exit();
+}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST["email"] ?? '');
@@ -25,12 +31,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
-
         $giris_ok = false;
+
         if (password_verify($sifre, $user['sifre'])) {
             $giris_ok = true;
         } elseif ($user['sifre'] === $sifre) {
-            // Eski düz metin şifre → hash'e yükselt
             $yeni_hash = password_hash($sifre, PASSWORD_BCRYPT);
             $upd = $conn->prepare("UPDATE users SET sifre = ? WHERE id = ?");
             $upd->bind_param("si", $yeni_hash, $user['id']);
