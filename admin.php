@@ -1,5 +1,15 @@
 <?php
+ob_start();
+ini_set("session.save_path", "/tmp");
 session_start();
+
+// HTTPS zorla (Railway)
+if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] !== 'https') {
+    header('Location: https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], true, 301);
+    exit();
+}
+header('X-Frame-Options: SAMEORIGIN');
+
 include("baglanti.php");
 
 if (!isset($_SESSION['admin_id'])) {
