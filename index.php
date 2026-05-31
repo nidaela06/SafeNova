@@ -1,26 +1,7 @@
 <?php
-ob_start();
-ini_set("session.save_path", "/tmp");
-ini_set("session.gc_probability", 1);
-error_reporting(0);
+
 session_start();
 
-// HTTPS zorla (Railway)
-if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] !== 'https') {
-    header('Location: https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], true, 301);
-    exit();
-}
-header('X-Frame-Options: SAMEORIGIN');
-// GÜVENLİK KAPISI:
-// Eğer 'user_id' diye bir oturum bilgisi YOKSA, kullanıcı giriş yapmamış demektir.
-if (!isset($_SESSION['user_id'])) {
-    // Kullanıcıyı hemen login sayfasına kovuyoruz:
-    header("Location: login.php");
-    exit();
-}
-
-// Eğer kod buraya kadar geldiyse, kullanıcı giriş yapmış demektir.
-// Aşağıdaki HTML kodları artık güvenle yüklenebilir.
 ?>
 <!DOCTYPE html>
 <html lang="tr">
