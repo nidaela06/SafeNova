@@ -1,14 +1,5 @@
 <?php
 session_start();
-
-var_dump($_SESSION); 
-die();
-
-// Eğer giriş bilgisi yoksa login'e gönder
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
-}
 ?>
 <!DOCTYPE html>
 <html lang="tr">
