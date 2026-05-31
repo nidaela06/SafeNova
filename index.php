@@ -1,13 +1,9 @@
 <?php
 session_start();
-// Eğer giriş bilgisi (anahtar) yoksa, kullanıcıyı login'e kov
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
-}
-
-// Giriş yapanın adını panelde kullanmak için değişkene alalım
-$user_name = isset($_SESSION['ad_soyad']) ? $_SESSION['ad_soyad'] : "Kullanıcı";
+echo "Gelen ID: " . ($_SESSION['user_id'] ?? 'ID YOK');
+echo "<br>Gelen İsim: " . ($_SESSION['ad_soyad'] ?? 'İSİM YOK');
+// header("Location: login.php"); // Şimdilik bunu yorum satırı yap ki hatayı görelim
+exit();
 ?>
 
 <!DOCTYPE html>
