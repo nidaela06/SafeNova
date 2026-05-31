@@ -1,8 +1,6 @@
 <?php
-ob_start();
-ini_set("session.save_path", "/tmp");
 session_start();
-include("baglanti.php");
+require("baglanti.php");
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $adsoyad      = trim($_POST["adsoyad"] ?? '');
@@ -14,49 +12,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: register.php?hata=bos");
         exit();
     }
-
     if ($sifre !== $sifre_tekrar) {
         header("Location: register.php?hata=eslesmez");
         exit();
     }
-
     if (strlen($sifre) < 6) {
         header("Location: register.php?hata=kisa");
         exit();
     }
 
-    $chk = $conn->prepare("SELECT id FROM users WHERE email = ?");
-    $chk->bind_param("s", $email);
-    $chk->execute();
-    $chk->store_result();
-    if ($chk->num_rows > 0) {
-        $chk->close();
+    $chk = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+    $chk->execute([$email]);
+    if ($chk->fetch()) {
         header("Location: register.php?hata=kayitli");
         exit();
     }
-    $chk->close();
 
     $sifre_hash = password_hash($sifre, PASSWORD_BCRYPT);
-
-    $stmt = $conn->prepare("INSERT INTO users (ad_soyad, email, sifre, is_admin) VALUES (?, ?, ?, 0)");
-    $stmt->bind_param("sss", $adsoyad, $email, $sifre_hash);
-
-    if ($stmt->execute()) {
-        $yeni_id = $conn->insert_id;
-        $_SESSION['user_id']  = $yeni_id;
+    $stmt = $pdo->prepare("INSERT INTO users (ad_soyad, email, sifre, is_admin) VALUES (?, ?, ?, 0)");
+    if ($stmt->execute([$adsoyad, $email, $sifre_hash])) {
+        $_SESSION['user_id']  = $pdo->lastInsertId();
         $_SESSION['ad_soyad'] = $adsoyad;
-        $stmt->close();
-        $conn->close();
         header("Location: index.php");
         exit();
-    } else {
-        $stmt->close();
-        $conn->close();
-        header("Location: register.php?hata=sunucu");
-        exit();
     }
+
+    header("Location: register.php?hata=sunucu");
+    exit();
 }
 
-$conn->close();
 header("Location: register.php");
 exit();
