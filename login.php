@@ -1,4 +1,17 @@
-<?php session_start(); if(isset($_SESSION['user_id'])){ header("Location: index.php"); exit(); } ?>
+<?php
+ob_start();
+ini_set("session.save_path", "/tmp");
+session_start();
+
+// HTTPS zorla (Railway)
+if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] !== 'https') {
+    header('Location: https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], true, 301);
+    exit();
+}
+
+// Güvenlik başlıkları
+header('X-Frame-Options: SAMEORIGIN');
+header('X-Content-Type-Options: nosniff'); if(isset($_SESSION['user_id'])){ header("Location: index.php"); exit(); } ?>
 <!DOCTYPE html>
 <html>
 <head>
