@@ -4,14 +4,28 @@ include("baglanti.php");
 
 if (!isset($_SESSION['admin_id'])) {
     if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_login'])) {
-        $email = $_POST["email"] ?? "";
+        $email = trim($_POST["email"] ?? "");
         $sifre = $_POST["sifre"] ?? "";
-        $email = $conn->real_escape_string($email);
-        $sifre = $conn->real_escape_string($sifre);
-        $sql = "SELECT * FROM users WHERE email='$email' AND sifre='$sifre' AND is_admin=1";
-        $sonuc = $conn->query($sql);
+        $stmt_a = $conn->prepare("SELECT * FROM users WHERE email = ? AND is_admin = 1");
+        $stmt_a->bind_param("s", $email);
+        $stmt_a->execute();
+        $sonuc = $stmt_a->get_result();
+        $stmt_a->close();
+        $admin_giris_ok = false;
         if ($sonuc && $sonuc->num_rows > 0) {
             $user = $sonuc->fetch_assoc();
+            if (password_verify($sifre, $user['sifre'])) {
+                $admin_giris_ok = true;
+            } elseif ($user['sifre'] === $sifre) {
+                // Düz metin → hash yükselt
+                $yh = password_hash($sifre, PASSWORD_BCRYPT);
+                $upd = $conn->prepare("UPDATE users SET sifre = ? WHERE id = ?");
+                $upd->bind_param("si", $yh, $user['id']);
+                $upd->execute(); $upd->close();
+                $admin_giris_ok = true;
+            }
+        }
+        if ($admin_giris_ok) {
             $_SESSION['admin_id'] = $user['id'];
             $_SESSION['admin_ad_soyad'] = $user['ad_soyad'];
             header("Location: admin.php");
