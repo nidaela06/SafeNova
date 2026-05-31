@@ -1,11 +1,10 @@
 <?php
 session_start();
-// Eğer giriş bilgisi yoksa login'e gönder
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
-}
+session_destroy(); // Tüm oturum bilgilerini siler
+header("Location: login.php"); // Seni login sayfasına atar
+exit();
 ?>
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
