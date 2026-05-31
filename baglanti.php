@@ -84,7 +84,10 @@ class MysqliCompat {
 
     public function set_charset(string $c): void {}
     public function close(): void {}
+    
 }
 
 $conn = new MysqliCompat($pdo);
+// GEÇİCİ - bir kez çalıştır sonra sil
+$pdo->exec("UPDATE users SET email = NULL WHERE email = ''");
 ?>
