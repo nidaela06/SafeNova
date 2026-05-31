@@ -1,4 +1,5 @@
 <?php
+session_start();
 include("baglanti.php");
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -8,49 +9,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sifre_tekrar = $_POST["sifre_tekrar"] ?? '';
 
     if (empty($adsoyad) || empty($email) || empty($sifre)) {
-        echo "Tüm alanlar zorunludur!";
+        header("Location: register.php?hata=bos");
         exit();
     }
 
     if ($sifre !== $sifre_tekrar) {
-        echo "Şifreler aynı değil!";
+        header("Location: register.php?hata=eslesmez");
         exit();
     }
 
     if (strlen($sifre) < 6) {
-        echo "Şifre en az 6 karakter olmalıdır!";
+        header("Location: register.php?hata=kisa");
         exit();
     }
 
-    // E-posta zaten kayıtlı mı?
     $chk = $conn->prepare("SELECT id FROM users WHERE email = ?");
     $chk->bind_param("s", $email);
     $chk->execute();
     $chk->store_result();
     if ($chk->num_rows > 0) {
         $chk->close();
-        echo "Bu e-posta adresi zaten kayıtlı!";
+        header("Location: register.php?hata=kayitli");
         exit();
     }
     $chk->close();
 
-    // Şifreyi güvenli şekilde hash'le
     $sifre_hash = password_hash($sifre, PASSWORD_BCRYPT);
 
-    $stmt = $conn->prepare("INSERT INTO users (ad_soyad, email, sifre) VALUES (?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO users (ad_soyad, email, sifre, is_admin) VALUES (?, ?, ?, 0)");
     $stmt->bind_param("sss", $adsoyad, $email, $sifre_hash);
 
     if ($stmt->execute()) {
+        $yeni_id = $conn->insert_id;
+        $_SESSION['user_id']  = $yeni_id;
+        $_SESSION['ad_soyad'] = $adsoyad;
         $stmt->close();
         $conn->close();
-        header("Location: login.php");
+        header("Location: index.php");
         exit();
     } else {
-        echo "Kayıt hatası: " . $conn->error;
+        $stmt->close();
+        $conn->close();
+        header("Location: register.php?hata=sunucu");
+        exit();
     }
-
-    $stmt->close();
 }
 
 $conn->close();
-?>
+header("Location: register.php");
+exit();
